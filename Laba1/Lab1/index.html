@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Lab2</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 16px; }
+    .screen { display: none; }
+    .active { display: block; }
+    .row { margin: 8px 0; }
+    canvas { border: 1px solid #999; display: block; margin-top: 10px; }
+    label { display: inline-block; width: 120px; }
+  </style>
+</head>
+<body>
+  <div id="menu" class="screen active">
+    <h2>Select Work</h2>
+    <div class="row">
+      <button id="work1">Work1(Text)</button>
+      <button id="work2">Work2(Number)</button>
+    </div>
+    <div class="row">
+      <small>After input, text/number will appear in the output area below.</small>
+    </div>
+    <h3>Output :</h3>
+    <canvas id="outputCanvas" width="620" height="150"></canvas>
+  </div>
+
+  <div id="dialog1" class="screen">
+    <h2>Text Input Dialog</h2>
+    <div class="row">
+      <label for="editInput">Enter text:</label>
+      <input id="editInput" type="text" style="width:400px;" />
+    </div>
+    <div class="row">
+      <button id="btnYes">OK</button>
+      <button id="btnCancel">Cancel</button>
+    </div>
+  </div>
+
+  <div id="dialog2" class="screen">
+    <h2>Number Input Dialog</h2>
+    <div class="row">
+      <label for="numRange">Choose number:</label>
+      <input id="numRange" type="range" min="1" max="100" value="50" />
+      <span id="numValue">50</span>
+    </div>
+    <div class="row">
+      <button id="btnNumYes">OK</button>
+      <button id="btnNumCancel">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    const screens = {
+      menu: document.getElementById('menu'),
+      dialog1: document.getElementById('dialog1'),
+      dialog2: document.getElementById('dialog2')
+    };
+
+    let storedText = "";
+    let storedNumber = null;
+
+    function show(screen) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      if (screens[screen]) screens[screen].classList.add('active');
+    }
+
+    function redrawCanvas() {
+      const canvas = document.getElementById('outputCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = '16px Arial';
+
+      let y = 30;
+      if (storedText) {
+        ctx.fillText("Text: " + storedText, 10, y);
+        y += 30;
+      }
+      if (storedNumber !== null) {
+        ctx.fillText("Number: " + storedNumber, 10, y);
+      }
+    }
+
+    document.getElementById('work1').onclick = () => {
+      ipcRenderer.send('choose-work', { work: 'work1' });
+    };
+    document.getElementById('work2').onclick = () => {
+      ipcRenderer.send('choose-work', { work: 'work2' });
+    };
+
+    document.getElementById('btnYes').onclick = () => {
+      const txt = document.getElementById('editInput').value || '';
+      ipcRenderer.send('mod1:dialog-action', { action: 'yes', text: txt });
+    };
+    document.getElementById('btnCancel').onclick = () => {
+      ipcRenderer.send('mod1:dialog-action', { action: 'cancel' });
+    };
+
+    const numRange = document.getElementById('numRange');
+    const numValue = document.getElementById('numValue');
+    numRange.oninput = () => {
+      numValue.innerText = numRange.value;
+    };
+
+    document.getElementById('btnNumYes').onclick = () => {
+      ipcRenderer.send('mod2:action', { action: 'yes', number: parseInt(numRange.value) });
+    };
+    document.getElementById('btnNumCancel').onclick = () => {
+      ipcRenderer.send('mod2:action', { action: 'cancel' });
+    };
+
+    ipcRenderer.on('show-screen', (ev, screen) => show(screen));
+
+    ipcRenderer.on('mod1:display-text', (ev, text) => {
+      storedText = text || "";
+      redrawCanvas();
+    });
+
+    ipcRenderer.on('mod1:focus-input', () => {
+      show('dialog1');
+      setTimeout(() => {
+        document.getElementById('editInput').focus();
+      }, 5);
+    });
+
+    ipcRenderer.on('mod2:display-number', (ev, number) => {
+      storedNumber = number;
+      redrawCanvas();
+    });
+
+    ipcRenderer.on('mod2:focus-input', () => {
+      show('dialog2');
+    });
+
+    show('menu');
+  </script>
+</body>
+</html>
