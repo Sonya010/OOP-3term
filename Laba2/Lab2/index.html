@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Lab 2 - Variant 14</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 10px;
+    }
+    canvas {
+        border: 1px solid black;
+        margin-top: 10px;
+    }
+    .menu {
+        list-style: none;
+        display: flex;
+        gap: 20px;
+        padding: 0;
+        margin: 0 0 10px 0;
+        background: #f1f1f1;
+    }
+
+    .menu > li {
+        position: relative;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    .menu ul {
+        display: none;
+        list-style: none;
+        position: absolute;
+        left: 0;
+        top: 100%;
+        background: white;
+        border: 1px solid #ccc;
+        padding: 0;
+        margin: 0;
+        width: 150px;
+    }
+
+    .menu li:hover ul {
+         display: block;
+    }
+
+    .menu ul li {
+        padding: 8px 10px;
+        cursor: pointer;
+    }
+
+    .menu ul li:hover {
+        background-color: #e0e0e0;
+    }
+
+    .menu-object.active {
+         font-weight: bold;
+        color: blue;
+    }
+  </style>
+</head>
+<body>
+  <ul class="menu">
+    <li>
+      File
+      <ul>
+        <li id="clearCanvas">Clear the field</li>
+      </ul>
+    </li>
+    <li>
+      Objects
+      <ul>
+        <li class="menu-object active" data-shape="Point">Point</li>
+        <li class="menu-object" data-shape="Line">Line</li>
+        <li class="menu-object" data-shape="Rectangle">Rectangle</li>
+        <li class="menu-object" data-shape="Ellipse">Ellipse</li>
+      </ul>
+    </li>
+    <li>
+      Help
+      <ul>
+        <li id="about-btn">About</li>
+      </ul>
+    </li>
+  </ul>
+
+  <canvas id="c1" width="800" height="600"></canvas>
+
+  <script type="module" src="renderer.js"></script>
+</body>
+</html>
